@@ -65,7 +65,7 @@ class OutputLayer(Layer):
         Initialise a new layer with set weights
         '''
         prev_layer = prev_layer
-        self.nodes = [OutputNode(weight) for weight in weights]
+        self.nodes = [OutputNode(prev_layer, weight) for weight in weights]
 
 # endregion
 
@@ -137,11 +137,11 @@ class Network:
 
         for layer_weights in weights:
             if not self.hidden_layers: # if hidden_layers is empty
-                self.hidden_layers += Layer(layer_weights, self.input_layer) # create a layer with the input layer as the previous layer
+                self.hidden_layers += [Layer(layer_weights, self.input_layer)] # create a layer with the input layer as the previous layer
             else:
-                self.hidden_layers += Layer(layer_weights, self.hidden_layers[-1]) # else create a layer based on the previous layer
+                self.hidden_layers += [Layer(layer_weights, self.hidden_layers[-1])] # else create a layer based on the previous layer
         
-        self.hidden_layers.remove[-1]
+        del self.hidden_layers[-1]
 
         self.output_layer = OutputLayer(weights[-1], self.hidden_layers[-1])
 
@@ -186,7 +186,6 @@ class Network:
         # TODO
 
 network = Network.createRandom(1,[1],1)
-
 # def randomiseWeights(self, prev_layer):
     #     '''
     #     Randomises the weights of this node
