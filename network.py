@@ -40,8 +40,7 @@ class Layer:
         '''
         Initialise a new layer with set weights
         '''
-        prev_layer = prev_layer
-        self.nodes = [Node(prev_layer, weight) for weight in weights]
+        self.nodes = [Node(prev_layer, node_weights) for node_weights in weights]
 
 
 class InputLayer(Layer):
@@ -64,8 +63,7 @@ class OutputLayer(Layer):
         '''
         Initialise a new layer with set weights
         '''
-        prev_layer = prev_layer
-        self.nodes = [OutputNode(prev_layer, weight) for weight in weights]
+        self.nodes = [OutputNode(prev_layer, node_weights) for node_weights in weights]
 
 # endregion
 
@@ -185,17 +183,5 @@ class Network:
         '''
         # TODO
 
-network = Network.createRandom(1,[1],1)
-# def randomiseWeights(self, prev_layer):
-    #     '''
-    #     Randomises the weights of this node
-
-    #     Parameters
-    #     ----------
-    #     prev_layer : Layer
-    #         The previous layer. A weight will be randomised for each node in this layer.
-    #     '''
-    #     n = len(prev_layer)
-    #     min, max = -(1.0 / math.sqrt(n)), (1.0 / math.sqrt(n))
-    #     for node in prev_layer:
-    #         self.weights[node] = random.uniform(min, max)
+# network = Network.createRandom(1, [1], 1)
+# network1 = Network.createRandom(2, [3, 3], 2)
