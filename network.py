@@ -73,7 +73,7 @@ class Node:
     '''
     One node of a neural network
     '''
-    weights = {} # a dictionary of nodes in the previous layer to weights
+    weights = None # a dictionary of nodes in the previous layer to weights
     value = None
 
     def __init__(self, prev_layer, weights) -> None:
@@ -118,10 +118,13 @@ class Network:
     '''
     A neural network
     '''
-    input_layer : Layer = None
-    hidden_layers : list[Layer] = []
-    output_layer : Layer = None
-    activation_function_f : Callable[[list[float], list[float]], float] = None # A function taking a list of input signals and a list of weights and returning an output value for a node
+    input_layer : Layer
+    hidden_layers : list[Layer]
+    output_layer : Layer
+    activation_function_f : Callable[[list[float], list[float]], float] # A function taking a list of input signals and a list of weights and returning an output value for a node
+
+    def __init__(self) -> None:
+        self.hidden_layers = []
 
     def createFromWeights(weights: list[list[list[float]]], 
                           activation_function: Callable[[list[float], list[float]], float] = Sigmoid) -> Self: 
@@ -183,5 +186,5 @@ class Network:
         '''
         # TODO
 
-# network = Network.createRandom(1, [1], 1)
-# network1 = Network.createRandom(2, [3, 3], 2)
+network = Network.createRandom(1, [1], 1)
+network1 = Network.createRandom(2, [3, 3], 2)
