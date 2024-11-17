@@ -118,9 +118,9 @@ class Network:
     '''
     A neural network
     '''
-    input_layer : Layer
-    hidden_layers : list[Layer]
-    output_layer : Layer
+    input_layer : Layer = None
+    hidden_layers : list[Layer] = []
+    output_layer : Layer = None
     activation_function_f : Callable[[list[float], list[float]], float] # A function taking a list of input signals and a list of weights and returning an output value for a node
 
     def __init__(self) -> None:
@@ -129,9 +129,7 @@ class Network:
     def createFromWeights(weights: list[list[list[float]]], 
                           activation_function: Callable[[list[float], list[float]], float] = Sigmoid) -> Self: 
         
-        self = Network()
-
-        self.activation_function_f = activation_function
+        self = Network.createEmpty(activation_function)
 
         input_layer_size = len(weights[0][0]) # size of input layer = number of weights for each node in the first hidden layer
         self.input_layer = InputLayer(input_layer_size)
@@ -167,7 +165,7 @@ class Network:
 
         return Network.createFromWeights(weights, activation_function=activation_function)
 
-    def createEmpty(activation_function: Callable[[list[float], list[float]], float] = Sigmoid, ) -> Self:
+    def createEmpty(activation_function: Callable[[list[float], list[float]], float] = Sigmoid) -> Self:
         
         self = Network()
 
@@ -185,6 +183,3 @@ class Network:
         Randomises the weights of all nodes in the network
         '''
         # TODO
-
-network = Network.createRandom(1, [1], 1)
-network1 = Network.createRandom(2, [3, 3], 2)
