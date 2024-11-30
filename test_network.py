@@ -158,4 +158,11 @@ def test_network_activation_gives_correct_output_for_sum_activation_function():
     network = Network.createRandom(2, [3, 3], 2, activation)
     assert network.activate([1, 1]) == [18, 18]
 
+def test_network_activation_gives_correct_output_for_default_activation_function():
+    weights = [
+        [[1, 1]],
+        [[0.5], [6]]
+    ]
+    network = Network.createFromWeights(weights)
+    assert network.activate([1, 1]) == [0.6083539905113917974904406486799764342316532211631442627440961721, 0.9949574219138469816618885150449085292094590358722334752380849723]
 # endregion
