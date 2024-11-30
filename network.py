@@ -9,7 +9,8 @@ from collections.abc import Callable
 # region Standard functions
 
 def Sigmoid(inputs: list[float], weights: list[float]):
-    raise NotImplementedError # TODO
+    s = sum([input * weight for input, weight in zip(inputs, weights)])
+    return 1 / (1 + (math.e ** -s))
 
 def XavierWeightInitialisation(n: int) -> float:
     '''
