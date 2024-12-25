@@ -4,7 +4,7 @@ from mock import patch
 
 class Helper:
     def get_node_weights(node: Node) -> list[float]:
-        return list(node.weights)
+        return list(node.weights) + [node.bias]
     
     def get_network_weights(network: Network) -> list[list[list[float]]]:
         weights = []
@@ -18,22 +18,22 @@ class Helper:
 
 def test_node_init_creates_valid_empty_node():
     prev_layer = InputLayer(0)
-    node = Node(prev_layer, [], None)
-    assert Helper.get_node_weights(node) == []
+    node = Node(prev_layer, [0], None)
+    assert Helper.get_node_weights(node) == [0]
 
 def test_node_init_creates_valid_node_from_weights():
     prev_layer = InputLayer(3)
-    weights = [0, 5, 0.3]
+    weights = [0, 5, 0.3, 0]
     node = Node(prev_layer, weights, None)
     assert Helper.get_node_weights(node) == weights
 
 def test_node_init_errors_when_passed_incorrect_num_of_weights():
     prev_layer = InputLayer(3)
-    weights = [0, 5]
+    weights = [0, 5, 0]
     with pytest.raises(ValueError):
         Node(prev_layer, weights, None)
 
-    weights = [0, 5, 7, 0.4]
+    weights = [0, 5, 7, 0.4, 0]
     with pytest.raises(ValueError):
         Node(prev_layer, weights, None)
 
@@ -61,22 +61,22 @@ def test_layer_init_creates_valid_empty_layer():
 
 def test_layer_init_creates_layer_with_correct_number_of_nodes():
     prev_layer = InputLayer(2)
-    layer = Layer([[0, 0]] * 3, prev_layer, None)
+    layer = Layer([[0, 0, 0], [0, 0, 0], [0, 0, 0]], prev_layer, None)
     assert len(layer.nodes) == 3
 
 def test_layer_init_creates_layer_with_correct_number_of_weights_per_node():
     prev_layer = InputLayer(2)
-    layer = Layer([[0, 0]] * 3, prev_layer, None)
+    layer = Layer([[0, 0, 0], [0, 0, 0], [0, 0, 0]], prev_layer, None)
     assert len(layer.nodes[0].weights) == 2
 
 def test_output_layer_init_creates_output_layer_with_correct_number_of_nodes():
     prev_layer = InputLayer(2)
-    layer = OutputLayer([[0, 0]] * 3, prev_layer, None)
+    layer = OutputLayer([[0, 0, 0], [0, 0, 0], [0, 0, 0]], prev_layer, None)
     assert len(layer.nodes) == 3
 
 def test_output_layer_init_creates_output_layer_with_correct_number_of_weights_per_node():
     prev_layer = InputLayer(2)
-    layer = OutputLayer([[0, 0]] * 3, prev_layer, None)
+    layer = OutputLayer([[0, 0, 0], [0, 0, 0], [0, 0, 0]], prev_layer, None)
     assert len(layer.nodes[0].weights) == 2
 
 # endregion
@@ -92,8 +92,8 @@ def test_network_createEmpty_creates_valid_empty_network():
 
 def test_network_createFromWeights_creates_correct_network():
     weights = [
-        [[0, 1], [2, 3], [4, 5]],
-        [[6, 7, 8], [9, 10, 11]]
+        [[0, 1, 4], [2, 3, 3], [4, 5, 1]],
+        [[6, 7, 8, 9], [9, 10, 11, 12]]
     ]
     network: Network = Network.createFromWeights(weights)
     assert Helper.get_network_weights(network) == weights
@@ -103,8 +103,8 @@ def test_network_createFromWeights_creates_valid_network_with_alternative_activa
         pass
 
     weights = [
-        [[0, 1], [2, 3], [4, 5]],
-        [[6, 7, 8], [9, 10, 11]]
+        [[0, 1, 4], [2, 3, 3], [4, 5, 1]],
+        [[6, 7, 8, 9], [9, 10, 11, 12]]
     ]
     network: Network = Network.createFromWeights(weights, activation_function)
 
@@ -116,9 +116,9 @@ def test_network_createRandom_creates_network_with_valid_node_distribution():
     network = Network.createRandom(2, [3, 3], 2)
     
     expected_zero_weights = [
-        [[0, 0], [0, 0], [0, 0]],
         [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0]]
+        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+        [[0, 0, 0, 0], [0, 0, 0, 0]]
     ]
     
     zero_weights = [[[0 for weight in node] for node in layer] for layer in Helper.get_network_weights(network)]
@@ -133,9 +133,9 @@ def test_network_createRandom_creates_correct_network_for_monkeypatched_random_f
         network = Network.createRandom(2, [3, 3], 2)
     
     expected_weights = [
-        [[0, 0], [0, 0], [0, 0]],
         [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0]]
+        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+        [[0, 0, 0, 0], [0, 0, 0, 0]]
     ]
     
     assert Helper.get_network_weights(network) == expected_weights
@@ -145,23 +145,23 @@ def test_network_createRandom_creates_correct_network_for_alternative_weight_ini
     network = Network.createRandom(2, [3, 3], 2, weight_initialisation_function = lambda *_: 0.0)
     
     expected_weights = [
-        [[0, 0], [0, 0], [0, 0]],
         [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0]]
+        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+        [[0, 0, 0, 0], [0, 0, 0, 0]]
     ]
     
     assert Helper.get_network_weights(network) == expected_weights
 
 def test_network_activation_gives_correct_output_for_sum_activation_function():
-    def activation(inputs: list[float], weights: list[float]):
+    def activation(inputs: list[float], weights: list[float], bias: float):
         return sum(inputs)
     network = Network.createRandom(2, [3, 3], 2, activation)
     assert network.activate([1, 1]) == [18, 18]
 
 def test_network_activation_gives_correct_output_for_default_activation_function():
     weights = [
-        [[1, 1]],
-        [[0.5], [6]]
+        [[1, 1, 0]],
+        [[0.5, 0], [6, 0]]
     ]
     network = Network.createFromWeights(weights)
     assert network.activate([1, 1]) == [0.6083539905113917974904406486799764342316532211631442627440961721, 0.9949574219138469816618885150449085292094590358722334752380849723] # calculated using https://www.wolframalpha.com/

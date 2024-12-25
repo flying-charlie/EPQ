@@ -8,8 +8,8 @@ from collections.abc import Callable
 
 # region Standard functions
 
-def Sigmoid(inputs: list[float], weights: list[float]):
-    s = sum([input * weight for input, weight in zip(inputs, weights)])
+def Sigmoid(inputs: list[float], weights: list[float], bias: float):
+    s = sum([input * weight for input, weight in zip(inputs, weights)]) + bias
     return 1 / (1 + (math.e ** -s))
 
 def XavierWeightInitialisation(n: int) -> float:
@@ -97,6 +97,7 @@ class Node:
     prev_layer = None
     value = None
     activation_function = None
+    bias = None
 
 
     def __init__(self, prev_layer, weights, activation_function) -> None:
@@ -112,16 +113,20 @@ class Node:
             A list of weights that matches up with each node in prev_layer. 
             Must be of equal length to prev_layer.
         '''
-
-        if len(weights) != prev_layer.getNodeCount(): # make sure there are the correct number of weights
-            raise ValueError(f"The length of weights ({len(weights)}) must be equal to the number of nodes in prev_layer ({prev_layer.getNodeCount()})")
         
-        self.weights = weights
+        print(weights)
+        print(prev_layer.getNodeCount())
+
+        if len(weights) != prev_layer.getNodeCount() + 1: # make sure there are the correct number of weights
+            raise ValueError(f"The length of weights ({len(weights)}) must be equal to the number of nodes in prev_layer ({prev_layer.getNodeCount()}) + 1 (constant bias)")
+        
+        self.bias = weights[-1]
+        self.weights = weights[:-1]
         self.prev_layer = prev_layer
         self.activation_function = activation_function
     
     def activate(self):
-        self.value = self.activation_function(self.prev_layer.getValues(), self.weights)
+        self.value = self.activation_function(self.prev_layer.getValues(), self.weights, self.bias)
 
 
 class InputNode(Node):
@@ -160,12 +165,39 @@ class Network:
     def __init__(self) -> None:
         self.hidden_layers = []
 
-    def createFromWeights(weights: list[list[list[float]]], 
+    def createFromWeights(weights: list[list[list[float]]],
                           activation_function: Callable[[list[float], list[float]], float] = Sigmoid) -> Self: 
         
+        '''
+        Create a new neural network based on a set of specified weights
+
+        Parameters
+        ----------
+        weights : list[list[list[float]]]
+            The set of weights to create the network from.
+            In the form of a 3 dimensional list with the hierarchy:
+
+            - Layers
+            - Nodes
+            - Weights
+
+            Each node must have a weight for each of the nodes in the previous layer + 1 constant term (the bias)
+
+        activation_function : Callable[[list[float], list[float]], float], optional
+            Default: Sigmoid
+
+            The function used when activating node. Takes parameters:
+            - inputs: list[float]
+                The list of inputs taken from the previous layer of nodes
+            - weights: list[float]
+                The weights of the current node
+            - bias: float
+                The constant bias of the current node
+        '''
+
         self = Network.createEmpty()
 
-        input_layer_size = len(weights[0][0]) # size of input layer = number of weights for each node in the first hidden layer
+        input_layer_size = len(weights[0][0]) - 1 # size of input layer = number of weights for each node in the first hidden layer
         self.input_layer = InputLayer(input_layer_size)
 
         for layer_weights in weights:
@@ -187,20 +219,55 @@ class Network:
                      weight_initialisation_function: Callable[[int], float] = XavierWeightInitialisation # input: n (num of nodes in prev layer), output: random initial edge weight
                      ) -> Self: 
 
+        '''
+        Create a new random neural network based on a set of specified layer sizes
+
+        Parameters
+        ----------
+        input_layer_size : int
+            The number of inputs to the neural network. Used to generate the input layer.
+        
+        hidden_layer_sizes : list[int]
+            The sizes of the hidden layers of the network. Each value in the list will generate a hidden layer of that size.
+
+        output_layer_size : int
+            The number of outputs to the neural network. Used to generate the output layer.
+        
+        activation_function : Callable[[list[float], list[float]], float], optional
+            Default: Sigmoid
+
+            The function used when activating node. Takes parameters:
+            - inputs: list[float]
+                The list of inputs taken from the previous layer of nodes
+            - weights: list[float]
+                The weights of the current node
+            - bias: float
+                The constant bias of the current node
+
+        weight_initialisation_function : Callable[[int], float], optional
+            Default: XavierWeightInitialisation
+
+            The function used when creating random weights. Takes parameters:
+            - n: int
+                The number of nodes in the previous layer of the network
+        '''
+
         weights = []
 
         for layer_size in hidden_layer_sizes:
             if not weights: # if weights is empty
-                weights += [[[weight_initialisation_function(input_layer_size) for _ in range(input_layer_size)] for _ in range(layer_size)]] # create a layer of weights using the input layer size for the number of weights
+                weights += [[[weight_initialisation_function(input_layer_size) for _ in range(input_layer_size + 1)] for _ in range(layer_size)]] # create a layer of weights using the input layer size for the number of weights
             else:
-                weights += [[[weight_initialisation_function(len(weights[-1])) for _ in range(len(weights[-1]))] for _ in range(layer_size)]] # else create a layer of weights based on the size of the previous layer
+                weights += [[[weight_initialisation_function(len(weights[-1])) for _ in range(len(weights[-1]) + 1)] for _ in range(layer_size)]] # else create a layer of weights based on the size of the previous layer
 
-        weights += [[[weight_initialisation_function(len(weights[-1])) for _ in range(len(weights[-1]))] for _ in range(output_layer_size)]] # add the output layer weights
+        weights += [[[weight_initialisation_function(len(weights[-1])) for _ in range(len(weights[-1]) + 1)] for _ in range(output_layer_size)]] # add the output layer weights
 
         return Network.createFromWeights(weights, activation_function=activation_function)
 
     def createEmpty() -> Self:
+        """
         
+        """
         self = Network()
 
         return self
