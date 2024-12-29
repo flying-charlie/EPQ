@@ -65,7 +65,7 @@ class InputLayer(Layer):
 
     def setInputs(self, inputs: list[float]) -> None:
         if len(inputs) != self.getNodeCount():
-            raise ValueError(f"The length of weights ({len(inputs)}) must be equal to the number of nodes in prev_layer ({self.getNodeCount()})")
+            raise ValueError(f"The length of inputs ({len(inputs)}) must be equal to the number of nodes in the input layer ({self.getNodeCount()})")
         
         for node, value in zip(self.nodes, inputs):
             node.setValue(value)
@@ -156,11 +156,20 @@ class OutputNode(Node):
 class Network:
     '''
     A neural network
+    
+    Methods
+    -------
+    createFromWeights(weights, activation_function)
+
+    createRandom(input_layer_size, hidden_layer_sizes, output_layer_size, activation_function, weight_initialisation_function) 
+        
+    createEmpty()
+
+    run(inputs)
     '''
     input_layer : Layer = None
     hidden_layers : list[Layer] = []
     output_layer : Layer = None
-    # activation_function_f : Callable[[list[float], list[float]], float] # A function taking a list of input signals and a list of weights and returning an output value for a node
 
     def __init__(self) -> None:
         self.hidden_layers = []
@@ -193,6 +202,11 @@ class Network:
                 The weights of the current node
             - bias: float
                 The constant bias of the current node
+        
+        Returns
+        -------
+        network: Network
+            The network created from the given weights
         '''
 
         self = Network.createEmpty()
@@ -220,7 +234,7 @@ class Network:
                      ) -> Self: 
 
         '''
-        Create a new random neural network based on a set of specified layer sizes
+        Create a new neural network with random weights, based on a set of specified layer sizes
 
         Parameters
         ----------
@@ -250,6 +264,11 @@ class Network:
             The function used when creating random weights. Takes parameters:
             - n: int
                 The number of nodes in the previous layer of the network
+        
+        Returns
+        -------
+        network: Network
+            The network created from the given layer sizes
         '''
 
         weights = []
@@ -266,24 +285,31 @@ class Network:
 
     def createEmpty() -> Self:
         """
-        
+        Create a new neural network with no layers
+
+        Returns
+        -------
+        network: Network
+            The created network
         """
         self = Network()
 
         return self
-
-    def initialiseLayers(self, input_layer_size : int, hidden_layer_sizes : list[int], output_layer_size : int) -> None:
-        self.input_layer = Layer(input_layer_size)
-        self.hidden_layers = [Layer(input_layer_size[len]) for len in hidden_layer_sizes]
-        self.output_layer = Layer(output_layer_size)
-
-    def randomiseWeights(self) -> None:
-        '''
-        Randomises the weights of all nodes in the network
-        '''
-        # TODO
     
-    def activate(self, inputs: list[float]) -> list[float]:
+    def run(self, inputs: list[float]) -> list[float]:
+        '''
+        Runs the network, taking a set of inputs and returning a set of outputs
+
+        Parameters
+        ----------
+        inputs : list[float]
+            A list containing the inputs to the network. Must be the same length as the number of inputs of the network
+        
+        Returns
+        -------
+        outputs: list[float]
+            A list containing the outputs from the network. Contains one float for each output from the network.
+        '''
         self.input_layer.setInputs(inputs)
         
         for layer in self.hidden_layers:
