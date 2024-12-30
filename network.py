@@ -94,7 +94,7 @@ class Node:
     One node of a neural network
     '''
     weights = None # a list of weights
-    prev_layer = None
+    prev_layer: Layer = None
     value = None
     activation_function = None
     bias = None
@@ -113,9 +113,6 @@ class Node:
             A list of weights that matches up with each node in prev_layer. 
             Must be of equal length to prev_layer.
         '''
-        
-        print(weights)
-        print(prev_layer.getNodeCount())
 
         if len(weights) != prev_layer.getNodeCount() + 1: # make sure there are the correct number of weights
             raise ValueError(f"The length of weights ({len(weights)}) must be equal to the number of nodes in prev_layer ({prev_layer.getNodeCount()}) + 1 (constant bias)")
@@ -232,7 +229,6 @@ class Network:
                      activation_function: Callable[[list[float], list[float]], float] = Sigmoid, 
                      weight_initialisation_function: Callable[[int], float] = XavierWeightInitialisation # input: n (num of nodes in prev layer), output: random initial edge weight
                      ) -> Self: 
-
         '''
         Create a new neural network with random weights, based on a set of specified layer sizes
 
