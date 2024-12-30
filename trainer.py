@@ -63,9 +63,13 @@ class GradientDescentTrainer:
         for node, adjustment in zip(layer.nodes, target_adjustments):
             node.bias += adjustment * self.learning_rate
 
-            for weight, connection, connection_adjustment in zip(node.weights, node.prev_layer.nodes, next_adjustments):
-                connection_adjustment += weight * adjustment * self.learning_rate
-                weight += connection.value * adjustment * self.learning_rate
+            for i in range(len(node.weights)):
+                print(next_adjustments)
+                print("before " + str(next_adjustments[i]))
+                print(node.weights[i], adjustment, self.learning_rate)
+                next_adjustments[i] += node.weights[i] * adjustment * self.learning_rate
+                print("after " + str(next_adjustments[i]))
+                node.weights[i] += node.prev_layer.nodes[i].value * adjustment * self.learning_rate
         
         return next_adjustments
 
