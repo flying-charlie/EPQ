@@ -8,7 +8,7 @@ class GradientDescentTrainer:
     target_function: Callable[[list[float]], list[float]]
     
 
-    def createWithRandomNetwork(self,
+    def createWithRandomNetwork(
                  input_layer_size : int, 
                  hidden_layer_sizes : list[int], 
                  output_layer_size : int, 
@@ -24,7 +24,7 @@ class GradientDescentTrainer:
         return GradientDescentTrainer.createFromNetwork(network, iterations, learning_rate, stopping_threshold, batch_size)
 
     
-    def createFromNetwork(self,
+    def createFromNetwork(
                  network : Network, 
                  iterations : int,
                  learning_rate : float,
@@ -50,7 +50,7 @@ class GradientDescentTrainer:
 
     def backpropagate(self, input: list[float], target_output: list[float]):
         self.network.run(input)
-        errors = [target - node.value for node, target in zip(layer.nodes, target_output)]
+        errors = [target - node.value for node, target in zip(self.network.output_layer.nodes, target_output)]
         next_adjustments = self.backpropagateLayer(self.network.output_layer, errors)    # TODO name this properly
 
         for layer in reversed(self.network.hidden_layers):
@@ -64,11 +64,7 @@ class GradientDescentTrainer:
             node.bias += adjustment * self.learning_rate
 
             for i in range(len(node.weights)):
-                print(next_adjustments)
-                print("before " + str(next_adjustments[i]))
-                print(node.weights[i], adjustment, self.learning_rate)
                 next_adjustments[i] += node.weights[i] * adjustment * self.learning_rate
-                print("after " + str(next_adjustments[i]))
                 node.weights[i] += node.prev_layer.nodes[i].value * adjustment * self.learning_rate
         
         return next_adjustments
@@ -85,3 +81,47 @@ class GradientDescentTrainer:
                 break
 
             previous_cost = cost
+
+'''
+def f1(x):
+    if x > 0:
+        return 1
+    else:
+        return 0
+
+def f2(x):
+    return abs(math.sin(x))
+
+def f3(x):
+    return 
+
+def g1(x):
+    return x
+
+def g2(x):
+    if x < 0.5:
+        return x
+    else:
+        return 0.5 - x
+
+f = g1
+
+trainer = GradientDescentTrainer.createWithRandomNetwork(1, [10] * 2, 1, 0, 0.02, 0, 1)
+for i in range(100):
+    expected = [f(0), f(0.5), f(1)]
+    actual = [i[0] for i in [trainer.network.run([0]), trainer.network.run([0.5]), trainer.network.run([1])]]
+    print(trainer.meanSquaredError(expected, actual))
+    for _ in range(5000):
+        rand = random.uniform(0, 1)
+        trainer.backpropagate([rand], [f(rand)])
+        
+
+print("Finished:")
+print(trainer.network.run([0]), f(0))
+print(trainer.network.run([0.5]), f(0.5))
+print(trainer.network.run([1]), f(1))
+
+expected = [f(0), f(0.5), f(1)]
+actual = [i[0] for i in [trainer.network.run([0]), trainer.network.run([0.5]), trainer.network.run([1])]]
+print("error:", trainer.meanSquaredError(expected, actual))
+'''
